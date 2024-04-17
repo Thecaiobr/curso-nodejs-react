@@ -1,0 +1,77 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+//criar uma migration: yarn prisma migrate dev
+model User{
+  id String @id @default(uuid())//Essa é uma diretiva do Prisma que indica que o campo "id" será a chave primária do modelo. 
+  name String
+  email String
+  password String
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+
+  @@map("users")
+}
+
+model Category{
+  id String @id @default(uuid())//Nesse caso, o valor padrão é gerado usando a função uuid(), que gera um identificador único universal (UUID).
+  name String
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+
+  @@map("categories")
+  products Product[]
+}
+
+model Product{
+  id String @id @default(uuid())
+  name String
+  price String
+  description String
+  banner String
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+
+  category Category @relation(fields: [category_id], references: [id])
+
+  @@map("products")
+  category_id String
+  items Item[]
+}
+
+model Order{
+  id String @id @default(uuid())
+  table Int
+  status Boolean @default(false)
+  draft Boolean @default(true)// rascunho do pedido
+  name String? // ? serve para falar que éum campo opicional
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+
+  @@map("orders")
+  items Item[]
+}
+
+model Item{
+  id String @id @default(uuid())
+  amount Int
+  created_at DateTime? @default(now())
+  updated_at DateTime? @default(now())
+
+  order Order @relation(fields: [order_id], references: [id])//fazendo isso estamos dizendo que uma order pode ter varios itens
+  product Product @relation(fields: [product_id], references: [id])
+
+  @@map("items")
+  order_id String//referente ao id do pedido
+  product_id String
+}
+
